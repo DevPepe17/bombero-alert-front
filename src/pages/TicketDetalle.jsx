@@ -161,6 +161,16 @@ export default function TicketDetalle({ auth }) {
     );
 
   const estadoConf = ESTADO_CONFIG[estadoActual] || ESTADO_CONFIG["EN_COLA"];
+  const ticketCerrado = ["RESUELTO", "CANCELADO", "FALSA_ALARMA"].includes(
+    estadoActual,
+  );
+  const mensajeEstado = ticketCerrado
+    ? "Ticket cerrado. Solo puedes visualizar la información registrada."
+    : ["EN_COLA", "RECIBIDO"].includes(estadoActual)
+      ? "Ticket recibido. Acepta para comenzar la atención o cancélalo."
+      : ["ACTIVO", "EN_CAMINO"].includes(estadoActual)
+        ? "Ticket activo. Actualiza el estado según el avance."
+        : "Ticket pendiente. Puedes retomarlo o cerrarlo.";
 
   const headerStyle = {
     background: "rgba(255,255,255,0.05)",
@@ -280,22 +290,24 @@ export default function TicketDetalle({ auth }) {
           >
             Cerrar
           </button>
-          <button
-            className="btn-primary"
-            onClick={handleGuardar}
-            disabled={guardando}
-            style={{
-              borderRadius: "4px",
-              padding: "8px 24px",
-              background: "var(--success)",
-            }}
-          >
-            <Save
-              size={16}
-              style={{ marginRight: "8px", verticalAlign: "middle" }}
-            />
-            {guardando ? "Guardando..." : "Guardar Cambios"}
-          </button>
+          {!ticketCerrado && (
+            <button
+              className="btn-primary"
+              onClick={handleGuardar}
+              disabled={guardando}
+              style={{
+                borderRadius: "4px",
+                padding: "8px 24px",
+                background: "var(--success)",
+              }}
+            >
+              <Save
+                size={16}
+                style={{ marginRight: "8px", verticalAlign: "middle" }}
+              />
+              {guardando ? "Guardando..." : "Guardar Cambios"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -435,6 +447,7 @@ export default function TicketDetalle({ auth }) {
                         <textarea
                           className="input-control"
                           rows="4"
+                          disabled={ticketCerrado}
                           style={{
                             borderRadius: "4px",
                             padding: "8px 12px",
@@ -459,6 +472,7 @@ export default function TicketDetalle({ auth }) {
                         <div>
                           <label style={labelStyle}>Categorización</label>
                           <select
+                            disabled={ticketCerrado}
                             className="input-control"
                             style={{ borderRadius: "4px", padding: "8px 12px" }}
                             value={formData.categorizacion}
@@ -478,6 +492,7 @@ export default function TicketDetalle({ auth }) {
                         <div>
                           <label style={labelStyle}>Prioridad</label>
                           <select
+                            disabled={ticketCerrado}
                             className="input-control"
                             style={{ borderRadius: "4px", padding: "8px 12px" }}
                             value={formData.prioridad}
@@ -513,9 +528,10 @@ export default function TicketDetalle({ auth }) {
                           zoom={15}
                           style={{ height: "100%", width: "100%", zIndex: 1 }}
                         >
-                          <TileLayer 
-                            attribution='&copy; OpenStreetMap contributors'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                          <TileLayer
+                            attribution="&copy; OpenStreetMap contributors"
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                          />
                           <Marker
                             position={[reporte.latitud, reporte.longitud]}
                             icon={customIcon}
@@ -612,6 +628,7 @@ export default function TicketDetalle({ auth }) {
                   <div>
                     <label style={labelStyle}>Asignar Unidad Disponible</label>
                     <select
+                      disabled={ticketCerrado}
                       className="input-control"
                       style={{
                         borderRadius: "4px",
@@ -649,6 +666,7 @@ export default function TicketDetalle({ auth }) {
                       Motivo de Resolución / Notas
                     </label>
                     <input
+                      disabled={ticketCerrado}
                       className="input-control"
                       style={{ borderRadius: "4px", padding: "8px 12px" }}
                       placeholder="Ej. Falsa alarma, despacho por cercanía..."
@@ -720,11 +738,15 @@ export default function TicketDetalle({ auth }) {
                   margin: "4px 0 8px 0",
                 }}
               >
-                {["EN_COLA", "RECIBIDO"].includes(estadoActual)
-                  ? "Ticket recibido. Acepta para comenzar la atención o cancélalo."
-                  : ["ACTIVO", "EN_CAMINO"].includes(estadoActual)
-                    ? "Ticket activo. Actualiza el estado según el avance."
-                    : "Ticket en revisión. Acéptalo nuevamente o ciérralo."}
+                {["RESUELTO", "CANCELADO", "FALSA_ALARMA"].includes(
+                  estadoActual,
+                )
+                  ? "Ticket cerrado. Solo puedes visualizar la información registrada."
+                  : ["EN_COLA", "RECIBIDO"].includes(estadoActual)
+                    ? "Ticket recibido. Acepta para comenzar la atención o cancélalo."
+                    : ["ACTIVO", "EN_CAMINO"].includes(estadoActual)
+                      ? "Ticket activo. Actualiza el estado según el avance."
+                      : "Ticket pendiente. Puedes retomarlo o cerrarlo."}
               </p>
 
               {/* ── EN_COLA / RECIBIDO (legacy): solo Aceptar y Cancelar ── */}
