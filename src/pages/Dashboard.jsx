@@ -98,7 +98,9 @@ export default function Dashboard({ auth }) {
       {/* Main Map */}
       <div className="glass-panel" style={{ height: '100%', overflow: 'hidden' }}>
         <MapContainer center={[-12.046374, -77.029851]} zoom={13} style={{ height: '100%', width: '100%' }}>
-          <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+          <TileLayer 
+            attribution='&copy; OpenStreetMap contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           
           {reportes.map(rep => (
             <Marker key={rep.id} position={[rep.latitud, rep.longitud]} icon={reportIcon}>

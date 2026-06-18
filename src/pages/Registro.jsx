@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import logoBomberos from "../assets/logo_bomberos.png";
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://bombero-alert-api.onrender.com/api';
 
@@ -52,7 +53,7 @@ export default function Registro({ onLogin }) {
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
       <div className="glass-panel animate-fade-in" style={{ width: '100%', maxWidth: '480px', padding: '40px' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div className="brand-icon" style={{ width: '56px', height: '56px', fontSize: '24px', margin: '0 auto 16px auto', borderRadius: '16px' }}>B</div>
+          <img src={logoBomberos} alt="Logo Bomberos" style={{ width: '56px', height: '56px', objectFit: "contain", margin: '0 auto 16px auto', borderRadius: '16px' }} />
           <h2 className="gradient-text" style={{ fontSize: '1.6rem', marginBottom: '8px' }}>Crear Cuenta de Ciudadano</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Únete a la red de reportes de emergencias</p>
         </div>

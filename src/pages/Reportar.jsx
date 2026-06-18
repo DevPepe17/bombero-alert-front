@@ -430,7 +430,9 @@ export default function Reportar({ auth }) {
                 zoom={15}
                 style={{ height: "100%", width: "100%", zIndex: 1 }}
               >
-                <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+                <TileLayer 
+                  attribution='&copy; OpenStreetMap contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <LocationPicker position={position} setPosition={setPosition} />
               </MapContainer>
             )}

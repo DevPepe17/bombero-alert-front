@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import logoBomberos from "../assets/logo_bomberos.png";
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://bombero-alert-api.onrender.com/api';
 
@@ -29,7 +30,7 @@ export default function Login({ onLogin }) {
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
       <div className="glass-panel animate-fade-in" style={{ width: '100%', maxWidth: '420px', padding: '40px' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div className="brand-icon" style={{ width: '64px', height: '64px', fontSize: '28px', margin: '0 auto 16px auto', borderRadius: '16px' }}>B</div>
+          <img src={logoBomberos} alt="Logo Bomberos" style={{ width: '64px', height: '64px', objectFit: "contain", margin: '0 auto 16px auto', borderRadius: '16px' }} />
           <h2 className="gradient-text" style={{ fontSize: '1.8rem', marginBottom: '8px' }}>Ingresar al Sistema</h2>
           <p style={{ color: 'var(--text-muted)' }}>Plataforma Central de Emergencias</p>
         </div>

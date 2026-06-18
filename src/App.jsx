@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import logoBomberos from "./assets/logo_bomberos.png";
 
 // ── Páginas Ciudadano ────────────────────────────────────────────────────────
 import Login from './pages/Login';
@@ -64,7 +65,7 @@ function App() {
           <header className="app-header glass-panel" style={{ borderRadius: 0, borderTop: 'none', borderLeft: 'none', borderRight: 'none' }}>
             <div className="container header-content">
               <div className="brand">
-                <div className="brand-icon">B</div>
+                <img src={logoBomberos} alt="Logo Bomberos" style={{ width: '48px', height: '48px', marginRight: '10px' }} />
                 <h3>Emergencias <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>| Perú</span></h3>
               </div>
 

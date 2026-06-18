@@ -123,7 +123,9 @@ export default function MisReportes({ auth }) {
           </div>
           <div style={{ flex: 1, width: '100%' }}>
             <MapContainer center={[-12.046374, -77.029851]} zoom={11} style={{ height: '100%', width: '100%', zIndex: 1 }}>
-              <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+              <TileLayer 
+                attribution='&copy; OpenStreetMap contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               {filteredReportes.map(rep => (
                 <Marker key={rep.id} position={[Number(rep.latitud), Number(rep.longitud)]} icon={customIcon}>
                   <Popup>
