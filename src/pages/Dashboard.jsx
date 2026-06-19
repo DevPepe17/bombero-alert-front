@@ -22,17 +22,19 @@ const reportIcon = new L.Icon({
 export default function Dashboard({ auth }) {
   const [reportes, setReportes] = useState([]);
   const [unidades, setUnidades] = useState([]);
+  const [estaciones, setEstaciones] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
       const headers = { Authorization: `Bearer ${auth.token}` };
 
-      const [resReportes, resUnidades] = await Promise.all([
+      const [resReportes, resUnidades, resEstaciones] = await Promise.all([
         axios.get(`${API_URL}/reportes/pendientes`, { headers }),
         axios.get(`${API_URL}/unidades/disponibles`, { headers }),
+        axios.get(`${API_URL}/estaciones`, { headers }), // Obtenemos las estaciones para mostrarlas en el mapa
       ]);
-      
+
       const reportesOperativos = resReportes.data.filter(
         (rep) =>
           rep.estado === "EN_COLA" ||
@@ -41,6 +43,7 @@ export default function Dashboard({ auth }) {
       );
       setReportes(reportesOperativos);
       setUnidades(resUnidades.data);
+      setEstaciones(resEstaciones.data); // Visualizamos las estaciones en el mapa.
     } catch (err) {
       console.error(err);
     } finally {
@@ -55,6 +58,7 @@ export default function Dashboard({ auth }) {
   }, [auth.token]);
 
   const reportesVisibles = reportes.slice(0, 4);
+  console.log("ESTACIONES:", estaciones);
 
   return (
     <div
@@ -207,6 +211,20 @@ export default function Dashboard({ auth }) {
                   <strong>{rep.tipoIncidente}</strong>
                   <br />
                   Reporte Pendiente
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+          {estaciones.map((estacion) => (
+            <Marker
+              key={`estacion-${estacion.id}`}
+              position={[estacion.latitud, estacion.longitud]}
+            >
+              <Popup>
+                <div style={{ color: "black" }}>
+                  <strong>{estacion.nombre}</strong>
+                  <br />
+                  Distrito: {estacion.distrito}
                 </div>
               </Popup>
             </Marker>
