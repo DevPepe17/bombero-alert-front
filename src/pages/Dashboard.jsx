@@ -3,20 +3,25 @@ import axios from "axios";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { Link } from "react-router-dom";
 import L from "leaflet";
+import MarcadorEmergencia from "../assets/marcador_emergencia.png";
+import EstacionBomberos from "../assets/estacion_bomberos.png";
 
 const API_URL =
   import.meta.env.VITE_API_URL || "https://bombero-alert-api.onrender.com/api";
 
 // Custom icons for Map
 const reportIcon = new L.Icon({
-  iconUrl:
-    "https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
+  iconUrl: MarcadorEmergencia,
+  iconSize: [64, 64],
+  iconAnchor: [32, 64],
+  popupAnchor: [0, -55],
+});
+
+const estacionIcon = new L.Icon({
+  iconUrl: EstacionBomberos,
+  iconSize: [72, 72],
+  iconAnchor: [36, 72],
+  popupAnchor: [0, -65],
 });
 
 export default function Dashboard({ auth }) {
@@ -219,12 +224,23 @@ export default function Dashboard({ auth }) {
             <Marker
               key={`estacion-${estacion.id}`}
               position={[estacion.latitud, estacion.longitud]}
+              icon={estacionIcon}
             >
               <Popup>
                 <div style={{ color: "black" }}>
                   <strong>{estacion.nombre}</strong>
                   <br />
                   Distrito: {estacion.distrito}
+                  <br />
+                  <br />
+                  <strong>Unidades:</strong>
+                  <br />
+                  {estacion.unidades?.map((u) => (
+                    <div key={u.id}>
+                      {u.estado === "DISPONIBLE" ? "🟢" : "🔴"}{" "}
+                      <strong>{u.codigo}</strong> - {u.tipo}
+                    </div>
+                  ))}
                 </div>
               </Popup>
             </Marker>
