@@ -29,6 +29,7 @@ export default function Dashboard({ auth }) {
   const [unidades, setUnidades] = useState([]);
   const [estaciones, setEstaciones] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sectorSeleccionado, setSectorSeleccionado] = useState("TODOS");
 
   const fetchData = async () => {
     try {
@@ -64,6 +65,33 @@ export default function Dashboard({ auth }) {
 
   const reportesVisibles = reportes.slice(0, 4);
   console.log("ESTACIONES:", estaciones);
+
+  const obtenerSector = (distrito) => {
+    const limaSur = [
+      "Chorrillos",
+      "Barranco",
+      "Miraflores",
+      "San Juan de Miraflores",
+      "Santiago de Surco",
+    ];
+
+    const limaCentro = ["Cercado de Lima", "Breña", "Magdalena"];
+
+    const callao = ["Bellavista"];
+
+    if (limaSur.includes(distrito)) return "LIMA_SUR";
+    if (limaCentro.includes(distrito)) return "LIMA_CENTRO";
+    if (callao.includes(distrito)) return "CALLAO";
+
+    return "LIMA_NORTE";
+  };
+
+  const estacionesFiltradas =
+    sectorSeleccionado === "TODOS"
+      ? estaciones
+      : estaciones.filter(
+          (estacion) => obtenerSector(estacion.distrito) === sectorSeleccionado,
+        );
 
   return (
     <div
@@ -193,8 +221,56 @@ export default function Dashboard({ auth }) {
       {/* Main Map */}
       <div
         className="glass-panel"
-        style={{ height: "100%", overflow: "hidden" }}
+        style={{ height: "100%", overflow: "hidden", position: "relative" }}
       >
+        <div
+          style={{
+            position: "absolute",
+            top: "16px",
+            left: "16px",
+            zIndex: 1000,
+            background: "rgba(0,0,0,0.75)",
+            padding: "10px",
+            borderRadius: "10px",
+            display: "flex",
+            gap: "8px",
+            flexWrap: "wrap",
+          }}
+        >
+          {[
+            { key: "TODOS", label: "Todos" },
+            { key: "LIMA_SUR", label: "Lima Sur" },
+            { key: "LIMA_CENTRO", label: "Lima Centro" },
+            { key: "LIMA_NORTE", label: "Lima Norte" },
+            { key: "CALLAO", label: "Callao" },
+          ].map((sector) => (
+            <button
+              key={sector.key}
+              onClick={() => setSectorSeleccionado(sector.key)}
+              style={{
+                padding: "6px 12px",
+                borderRadius: "20px",
+                border:
+                  sectorSeleccionado === sector.key
+                    ? "1px solid var(--primary)"
+                    : "1px solid var(--surface-border)",
+                background:
+                  sectorSeleccionado === sector.key
+                    ? "rgba(255, 59, 48, 0.25)"
+                    : "rgba(255,255,255,0.08)",
+                color:
+                  sectorSeleccionado === sector.key
+                    ? "var(--primary)"
+                    : "white",
+                cursor: "pointer",
+                fontSize: "0.8rem",
+                fontWeight: 600,
+              }}
+            >
+              {sector.label}
+            </button>
+          ))}
+        </div>
         <MapContainer
           center={[-12.046374, -77.029851]}
           zoom={13}
@@ -220,7 +296,7 @@ export default function Dashboard({ auth }) {
               </Popup>
             </Marker>
           ))}
-          {estaciones.map((estacion) => (
+          {estacionesFiltradas.map((estacion) => (
             <Marker
               key={`estacion-${estacion.id}`}
               position={[estacion.latitud, estacion.longitud]}
