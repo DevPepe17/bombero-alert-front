@@ -30,6 +30,7 @@ export default function Dashboard({ auth }) {
   const [estaciones, setEstaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sectorSeleccionado, setSectorSeleccionado] = useState("TODOS");
+  const [companiasAbiertas, setCompaniasAbiertas] = useState({});
 
   const fetchData = async () => {
     try {
@@ -64,7 +65,6 @@ export default function Dashboard({ auth }) {
   }, [auth.token]);
 
   const reportesVisibles = reportes.slice(0, 4);
-  console.log("ESTACIONES:", estaciones);
 
   const obtenerSector = (distrito) => {
     const limaSur = [
@@ -92,6 +92,46 @@ export default function Dashboard({ auth }) {
       : estaciones.filter(
           (estacion) => obtenerSector(estacion.distrito) === sectorSeleccionado,
         );
+
+  const estacionesPorSector = estaciones.reduce((acc, estacion) => {
+    const sector = obtenerSector(estacion.distrito);
+
+    if (!acc[sector]) {
+      acc[sector] = [];
+    }
+
+    acc[sector].push(estacion);
+    return acc;
+  }, {});
+
+  const sectoresOrdenados = [
+    { key: "LIMA_SUR", label: "Lima Sur" },
+    { key: "LIMA_CENTRO", label: "Lima Centro" },
+    { key: "LIMA_NORTE", label: "Lima Norte" },
+    { key: "CALLAO", label: "Callao" },
+  ];
+
+  const unidadesAgrupadas = estacionesFiltradas.map((estacion) => ({
+    ...estacion,
+    unidadesDisponibles: unidades.filter(
+      (u) => u.nombreEstacion === estacion.nombre,
+    ),
+  }));
+
+  const extraerNumeroCompania = (nombre) => {
+    const match = nombre.match(/N°\s*(\d+)/);
+    return match ? Number(match[1]) : 999;
+  };
+
+  const unidadesAgrupadasOrdenadas = [...unidadesAgrupadas].sort(
+    (a, b) => extraerNumeroCompania(a.nombre) - extraerNumeroCompania(b.nombre),
+  );
+  const toggleCompania = (id) => {
+    setCompaniasAbiertas((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
 
   return (
     <div
@@ -191,29 +231,104 @@ export default function Dashboard({ auth }) {
         </div>
 
         <div className="glass-panel" style={{ padding: "24px" }}>
-          <h3
-            className="gradient-text"
-            style={{ marginBottom: "16px", color: "var(--success)" }}
-          >
-            Unidades Libres ({unidades.length})
+          <h3 className="gradient-text" style={{ marginBottom: "4px" }}>
+            Disponibilidad por Compañía
           </h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {unidades.map((u) => (
-              <div
-                key={u.id}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  background: "rgba(255,255,255,0.05)",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  fontSize: "0.9rem",
-                }}
-              >
-                <span style={{ fontWeight: 600 }}>{u.codigo}</span>
-                <span style={{ color: "var(--text-muted)" }}>{u.tipo}</span>
-              </div>
-            ))}
+          <p
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "0.8rem",
+              marginBottom: "16px",
+            }}
+          >
+            {sectorSeleccionado === "TODOS"
+              ? "Mostrando todos los sectores"
+              : `Mostrando ${sectoresOrdenados.find((s) => s.key === sectorSeleccionado)?.label}`}
+          </p>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+          >
+            {unidadesAgrupadasOrdenadas.map((estacion) => {
+              const abierta = companiasAbiertas[estacion.id];
+
+              return (
+                <div
+                  key={estacion.id}
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    borderRadius: "10px",
+                    padding: "12px",
+                  }}
+                >
+                  <div
+                    onClick={() => toggleCompania(estacion.id)}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                      fontWeight: 700,
+                      color: "var(--primary)",
+                    }}
+                  >
+                    <span>🚒 {estacion.nombre}</span>
+                    <span
+                      style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}
+                    >
+                      {abierta ? "▼" : "▶"}{" "}
+                      {estacion.unidadesDisponibles.length}
+                    </span>
+                  </div>
+
+                  {!abierta && (
+                    <div
+                      style={{
+                        marginTop: "6px",
+                        color: "var(--text-muted)",
+                        fontSize: "0.8rem",
+                      }}
+                    >
+                      🟢 {estacion.unidadesDisponibles.length} unidades
+                      disponibles
+                    </div>
+                  )}
+
+                  {abierta && (
+                    <div style={{ marginTop: "10px" }}>
+                      {estacion.unidadesDisponibles.length === 0 ? (
+                        <div
+                          style={{
+                            color: "var(--text-muted)",
+                            fontSize: "0.85rem",
+                          }}
+                        >
+                          Sin unidades disponibles
+                        </div>
+                      ) : (
+                        estacion.unidadesDisponibles.map((u) => (
+                          <div
+                            key={u.id}
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              padding: "6px 0",
+                              fontSize: "0.85rem",
+                            }}
+                          >
+                            <span>
+                              🟢 <strong>{u.codigo}</strong>
+                            </span>
+                            <span style={{ color: "var(--text-muted)" }}>
+                              {u.tipo}
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
