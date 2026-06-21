@@ -75,13 +75,22 @@ export default function Dashboard({ auth }) {
       "Santiago de Surco",
     ];
 
+    const limaNorte = [
+      "Comas",
+      "Los Olivos",
+      "Independencia",
+      "San Martín de Porres",
+      "Puente Piedra",
+    ];
+
     const limaCentro = ["Cercado de Lima", "Breña", "Magdalena"];
 
-    const callao = ["Bellavista"];
+    const callao = ["Bellavista", "Callao"];
 
     if (limaSur.includes(distrito)) return "LIMA_SUR";
     if (limaCentro.includes(distrito)) return "LIMA_CENTRO";
     if (callao.includes(distrito)) return "CALLAO";
+    if (limaNorte.includes(distrito)) return "LIMA_NORTE";
 
     return "LIMA_NORTE";
   };
