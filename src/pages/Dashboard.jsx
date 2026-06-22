@@ -351,7 +351,7 @@ export default function Dashboard({ auth }) {
           style={{
             position: "absolute",
             top: "16px",
-            left: "16px",
+            left: "72px",
             zIndex: 1000,
             background: "rgba(0,0,0,0.75)",
             padding: "10px",
@@ -427,20 +427,38 @@ export default function Dashboard({ auth }) {
               icon={estacionIcon}
             >
               <Popup>
-                <div style={{ color: "black" }}>
-                  <strong>{estacion.nombre}</strong>
-                  <br />
-                  Distrito: {estacion.distrito}
-                  <br />
-                  <br />
-                  <strong>Unidades:</strong>
-                  <br />
-                  {estacion.unidades?.map((u) => (
-                    <div key={u.id}>
-                      {u.estado === "DISPONIBLE" ? "🟢" : "🔴"}{" "}
-                      <strong>{u.codigo}</strong> - {u.tipo}
-                    </div>
-                  ))}
+                <div style={{ color: "black", minWidth: "240px" }}>
+                  <strong style={{ fontSize: "1rem" }}>
+                    {estacion.nombre}
+                  </strong>
+
+                  <div style={{ marginTop: "8px" }}>
+                    📍 {estacion.distrito}
+                    <br />
+                    🏠 {estacion.direccion}
+                    <br />☎ {estacion.telefono}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: "10px",
+                      padding: "8px",
+                      borderRadius: "8px",
+                      background: "#f3f3f3",
+                    }}
+                  >
+                    <strong>Resumen Operativo</strong>
+                    <br />
+                    🟢 Disponibles:{" "}
+                    {estacion.unidades?.filter((u) => u.estado === "DISPONIBLE")
+                      .length ?? 0}
+                    <br />
+                    🔴 Ocupadas:{" "}
+                    {estacion.unidades?.filter((u) => u.estado !== "DISPONIBLE")
+                      .length ?? 0}
+                    <br />
+                    🚑 Total: {estacion.unidades?.length ?? 0}
+                  </div>
                 </div>
               </Popup>
             </Marker>
