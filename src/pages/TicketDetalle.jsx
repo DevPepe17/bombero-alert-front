@@ -829,7 +829,63 @@ export default function TicketDetalle({ auth }) {
                   {estadoConf.label}
                 </span>
               </div>
+              <div
+                style={{
+                  marginTop: "12px",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid var(--surface-border)",
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: "bold",
+                    color: "var(--primary)",
+                    marginBottom: "10px",
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  📜 Historial del Ticket
+                </div>
 
+                <div
+                  style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}
+                >
+                  🟡 Reporte recibido
+                  <br />
+                  <span style={{ color: "rgba(255,255,255,0.65)" }}>
+                    {new Date(reporte.timestamp).toLocaleString()}
+                  </span>
+                </div>
+
+                {reporte.unidadesDespachadas?.map((unidad) => (
+                  <div
+                    key={unidad.idAsignacion}
+                    style={{
+                      marginTop: "10px",
+                      fontSize: "0.78rem",
+                      color: "var(--text-muted)",
+                    }}
+                  >
+                    🚒 {unidad.codigo} despachada
+                    <br />
+                    <span style={{ color: "rgba(255,255,255,0.65)" }}>
+                      {new Date(unidad.fechaAsignacion).toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+
+                <div
+                  style={{
+                    marginTop: "10px",
+                    fontSize: "0.78rem",
+                    color: "var(--text-muted)",
+                  }}
+                >
+                  ⚡ Estado actual: {estadoConf.label}
+                </div>
+              </div>
               <p
                 style={{
                   fontSize: "0.78rem",
