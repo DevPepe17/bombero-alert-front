@@ -71,38 +71,37 @@ export default function TicketDetalle({ auth }) {
     unidadAsignada: "",
     motivoResolucion: "",
   });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const headers = { Authorization: `Bearer ${auth.token}` };
-        const [resReportes, resUnidades] = await Promise.all([
-          axios.get(`${API_URL}/reportes/pendientes`, { headers }),
-          axios.get(`${API_URL}/unidades/disponibles`, { headers }),
-        ]);
-        const found = resReportes.data.find((r) => r.id.toString() === id);
-        if (found) {
-          setReporte(found);
-          setEstadoActual(found.estado || "EN_COLA");
-          setFormData((prev) => ({
-            ...prev,
-            nombre: found.nombreCiudadano || "Ciudadano Anónimo",
-            telefono: found.telefonoCiudadano || "No registrado",
-            correo: found.correoCiudadano || "No registrado",
-            descripcion: found.descripcion || "",
-            prioridad: found.prioridad || "P1",
-            motivoResolucion: found.motivoResolucion || "",
-            categorizacion: found.tipoIncidente,
-          }));
-        }
-        setUnidades(resUnidades.data);
-      } catch (err) {
-        console.error("Error cargando ticket:", err);
-      } finally {
-        setLoading(false);
+  const cargarTicket = async () => {
+    try {
+      const headers = { Authorization: `Bearer ${auth.token}` };
+      const [resReportes, resUnidades] = await Promise.all([
+        axios.get(`${API_URL}/reportes/pendientes`, { headers }),
+        axios.get(`${API_URL}/unidades/disponibles`, { headers }),
+      ]);
+      const found = resReportes.data.find((r) => r.id.toString() === id);
+      if (found) {
+        setReporte(found);
+        setEstadoActual(found.estado || "EN_COLA");
+        setFormData((prev) => ({
+          ...prev,
+          nombre: found.nombreCiudadano || "Ciudadano Anónimo",
+          telefono: found.telefonoCiudadano || "No registrado",
+          correo: found.correoCiudadano || "No registrado",
+          descripcion: found.descripcion || "",
+          prioridad: found.prioridad || "P1",
+          motivoResolucion: found.motivoResolucion || "",
+          categorizacion: found.tipoIncidente,
+        }));
       }
-    };
-    fetchData();
+      setUnidades(resUnidades.data);
+    } catch (err) {
+      console.error("Error cargando ticket:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    cargarTicket();
   }, [id, auth.token]);
 
   const handleGuardar = async () => {
@@ -122,6 +121,34 @@ export default function TicketDetalle({ auth }) {
       alert("Ticket guardado correctamente.");
     } catch (err) {
       alert("Error al guardar el ticket.");
+    } finally {
+      setGuardando(false);
+    }
+  };
+  const handleDespacharUnidad = async () => {
+    if (!formData.unidadAsignada) {
+      alert("Selecciona una unidad para despachar.");
+      return;
+    }
+
+    setGuardando(true);
+
+    try {
+      const headers = { Authorization: `Bearer ${auth.token}` };
+
+      await axios.post(
+        `${API_URL}/incidentes/reportes/${id}/despachar/${formData.unidadAsignada}`,
+        {},
+        { headers },
+      );
+
+      alert("Unidad despachada correctamente.");
+      setEstadoActual("ACTIVO");
+
+      await cargarTicket();
+    } catch (err) {
+      console.error(err);
+      alert("Error al despachar la unidad.");
     } finally {
       setGuardando(false);
     }
@@ -648,11 +675,83 @@ export default function TicketDetalle({ auth }) {
                         -- Seleccionar Unidad (Opcional) --
                       </option>
                       {unidades.map((u) => (
-                        <option key={u.id} value={u.codigo}>
+                        <option key={u.id} value={u.id}>
                           {u.codigo} ({u.tipo})
                         </option>
                       ))}
                     </select>
+                    <button
+                      className="btn-primary"
+                      disabled={
+                        ticketCerrado || !formData.unidadAsignada || guardando
+                      }
+                      onClick={handleDespacharUnidad}
+                      style={{
+                        marginTop: "10px",
+                        width: "100%",
+                        borderRadius: "4px",
+                        padding: "10px 12px",
+                        background: "var(--success)",
+                      }}
+                    >
+                      {guardando ? "Despachando..." : "Despachar Unidad"}
+                    </button>
+                    {reporte.unidadesDespachadas &&
+                      reporte.unidadesDespachadas.length > 0 && (
+                        <div
+                          style={{
+                            marginTop: "16px",
+                            padding: "12px",
+                            borderRadius: "8px",
+                            background: "rgba(255,255,255,0.04)",
+                            border: "1px solid var(--surface-border)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontWeight: "bold",
+                              marginBottom: "10px",
+                              color: "var(--primary)",
+                            }}
+                          >
+                            🚒 Unidades Despachadas
+                          </div>
+
+                          {reporte.unidadesDespachadas.map((unidad) => (
+                            <div
+                              key={unidad.idAsignacion}
+                              style={{
+                                padding: "8px 0",
+                                borderBottom:
+                                  "1px solid rgba(255,255,255,0.08)",
+                              }}
+                            >
+                              <div>
+                                {reporte.estado === "ACTIVO" ||
+                                reporte.estado === "PENDIENTE" ? (
+                                  <>
+                                    {unidad.estadoUnidad === "DISPONIBLE"
+                                      ? "🟢"
+                                      : "🔴"}{" "}
+                                    <strong>{unidad.codigo}</strong>
+                                  </>
+                                ) : (
+                                  <strong>{unidad.codigo}</strong>
+                                )}
+                              </div>
+
+                              <div
+                                style={{
+                                  fontSize: "0.8rem",
+                                  color: "var(--text-muted)",
+                                }}
+                              >
+                                {unidad.tipo}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     {unidades.length === 0 && (
                       <span
                         style={{ color: "var(--primary)", fontSize: "0.8rem" }}

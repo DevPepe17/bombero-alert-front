@@ -122,9 +122,7 @@ export default function Dashboard({ auth }) {
 
   const unidadesAgrupadas = estacionesFiltradas.map((estacion) => ({
     ...estacion,
-    unidadesDisponibles: unidades.filter(
-      (u) => u.nombreEstacion === estacion.nombre,
-    ),
+    unidadesOperativas: estacion.unidades || [],
   }));
 
   const extraerNumeroCompania = (nombre) => {
@@ -135,6 +133,20 @@ export default function Dashboard({ auth }) {
   const unidadesAgrupadasOrdenadas = [...unidadesAgrupadas].sort(
     (a, b) => extraerNumeroCompania(a.nombre) - extraerNumeroCompania(b.nombre),
   );
+  const unidadesDelSector = estacionesFiltradas.flatMap(
+    (estacion) => estacion.unidades || [],
+  );
+
+  const totalEstaciones = estacionesFiltradas.length;
+
+  const totalDisponibles = unidadesDelSector.filter(
+    (unidad) => unidad.estado === "DISPONIBLE",
+  ).length;
+
+  const totalOcupadas = unidadesDelSector.filter(
+    (unidad) => unidad.estado !== "DISPONIBLE",
+  ).length;
+  const totalEmergencias = reportes.length;
   const toggleCompania = (id) => {
     setCompaniasAbiertas((prev) => ({
       ...prev,
@@ -284,8 +296,7 @@ export default function Dashboard({ auth }) {
                     <span
                       style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}
                     >
-                      {abierta ? "▼" : "▶"}{" "}
-                      {estacion.unidadesDisponibles.length}
+                      {abierta ? "▼" : "▶"} {estacion.unidadesOperativas.length}
                     </span>
                   </div>
 
@@ -297,14 +308,25 @@ export default function Dashboard({ auth }) {
                         fontSize: "0.8rem",
                       }}
                     >
-                      🟢 {estacion.unidadesDisponibles.length} unidades
-                      disponibles
+                      🟢{" "}
+                      {
+                        estacion.unidadesOperativas.filter(
+                          (u) => u.estado === "DISPONIBLE",
+                        ).length
+                      }{" "}
+                      disponibles • 🔴{" "}
+                      {
+                        estacion.unidadesOperativas.filter(
+                          (u) => u.estado !== "DISPONIBLE",
+                        ).length
+                      }{" "}
+                      ocupadas
                     </div>
                   )}
 
                   {abierta && (
                     <div style={{ marginTop: "10px" }}>
-                      {estacion.unidadesDisponibles.length === 0 ? (
+                      {estacion.unidadesOperativas.length === 0 ? (
                         <div
                           style={{
                             color: "var(--text-muted)",
@@ -314,7 +336,7 @@ export default function Dashboard({ auth }) {
                           Sin unidades disponibles
                         </div>
                       ) : (
-                        estacion.unidadesDisponibles.map((u) => (
+                        estacion.unidadesOperativas.map((u) => (
                           <div
                             key={u.id}
                             style={{
@@ -325,7 +347,8 @@ export default function Dashboard({ auth }) {
                             }}
                           >
                             <span>
-                              🟢 <strong>{u.codigo}</strong>
+                              {u.estado === "DISPONIBLE" ? "🟢" : "🔴"}{" "}
+                              <strong>{u.codigo}</strong>
                             </span>
                             <span style={{ color: "var(--text-muted)" }}>
                               {u.tipo}
@@ -351,49 +374,92 @@ export default function Dashboard({ auth }) {
           style={{
             position: "absolute",
             top: "16px",
-            left: "72px",
+            left: "160px",
             zIndex: 1000,
             background: "rgba(0,0,0,0.75)",
             padding: "10px",
             borderRadius: "10px",
             display: "flex",
-            gap: "8px",
-            flexWrap: "wrap",
+            flexDirection: "column",
+            gap: "10px",
           }}
         >
-          {[
-            { key: "TODOS", label: "Todos" },
-            { key: "LIMA_SUR", label: "Lima Sur" },
-            { key: "LIMA_CENTRO", label: "Lima Centro" },
-            { key: "LIMA_NORTE", label: "Lima Norte" },
-            { key: "CALLAO", label: "Callao" },
-          ].map((sector) => (
-            <button
-              key={sector.key}
-              onClick={() => setSectorSeleccionado(sector.key)}
-              style={{
-                padding: "6px 12px",
-                borderRadius: "20px",
-                border:
-                  sectorSeleccionado === sector.key
-                    ? "1px solid var(--primary)"
-                    : "1px solid var(--surface-border)",
-                background:
-                  sectorSeleccionado === sector.key
-                    ? "rgba(255, 59, 48, 0.25)"
-                    : "rgba(255,255,255,0.08)",
-                color:
-                  sectorSeleccionado === sector.key
-                    ? "var(--primary)"
-                    : "white",
-                cursor: "pointer",
-                fontSize: "0.8rem",
-                fontWeight: 600,
-              }}
-            >
-              {sector.label}
-            </button>
-          ))}
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            {[
+              { key: "TODOS", label: "Todos" },
+              { key: "LIMA_SUR", label: "Lima Sur" },
+              { key: "LIMA_CENTRO", label: "Lima Centro" },
+              { key: "LIMA_NORTE", label: "Lima Norte" },
+              { key: "CALLAO", label: "Callao" },
+            ].map((sector) => (
+              <button
+                key={sector.key}
+                onClick={() => setSectorSeleccionado(sector.key)}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "20px",
+                  border:
+                    sectorSeleccionado === sector.key
+                      ? "1px solid var(--primary)"
+                      : "1px solid var(--surface-border)",
+                  background:
+                    sectorSeleccionado === sector.key
+                      ? "rgba(255, 59, 48, 0.25)"
+                      : "rgba(255,255,255,0.08)",
+                  color:
+                    sectorSeleccionado === sector.key
+                      ? "var(--primary)"
+                      : "white",
+                  cursor: "pointer",
+                  fontSize: "0.8rem",
+                  fontWeight: 600,
+                }}
+              >
+                {sector.label}
+              </button>
+            ))}
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, minmax(85px, 1fr))",
+              gap: "8px",
+            }}
+          >
+            {[
+              { label: "Estaciones", value: totalEstaciones, icon: "🚒" },
+              { label: "Disponibles", value: totalDisponibles, icon: "🟢" },
+              { label: "Ocupadas", value: totalOcupadas, icon: "🔴" },
+              { label: "Emergencias", value: totalEmergencias, icon: "🚨" },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: "10px",
+                  padding: "8px 10px",
+                  color: "white",
+                  textAlign: "center",
+                  minWidth: "85px",
+                }}
+              >
+                <div style={{ fontSize: "0.95rem", fontWeight: 700 }}>
+                  {stat.icon} {stat.value}
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.68rem",
+                    color: "rgba(255,255,255,0.7)",
+                    marginTop: "2px",
+                  }}
+                >
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
         <MapContainer
           center={[-12.046374, -77.029851]}
