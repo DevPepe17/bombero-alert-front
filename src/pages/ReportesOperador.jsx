@@ -114,7 +114,7 @@ export default function ReportesOperador({ auth }) {
             className="gradient-text"
             style={{ fontSize: "2.2rem", marginBottom: "8px" }}
           >
-            Todos los Reportes Pendientes
+            Gestión Operativa de Emergencias
           </h2>
           <p style={{ color: "var(--text-muted)" }}>
             Gestión, búsqueda y asignación de unidades para emergencias en cola.

@@ -330,10 +330,10 @@ export default function Reportar({ auth }) {
               id="foto-reporte"
               type="file"
               accept="image/*"
+              capture="environment"
               onChange={handleImagenChange}
               style={{ display: "none" }}
             />
-
             <label
               htmlFor="foto-reporte"
               className="btn-secondary"
@@ -353,23 +353,41 @@ export default function Reportar({ auth }) {
             >
               <Camera size={20} />
               <span style={{ fontWeight: 600 }}>
-                {imagen ? "CAMBIAR FOTOGRAFÍA" : "TOMAR FOTOGRAFÍA"}
+                {imagen ? "CAMBIAR EVIDENCIA" : "AGREGAR EVIDENCIA"}
               </span>
             </label>
 
             {preview && (
-              <img
-                src={preview}
-                alt="Vista previa"
-                style={{
-                  width: "100%",
-                  marginTop: "16px",
-                  borderRadius: "12px",
-                  maxHeight: "220px",
-                  objectFit: "cover",
-                  border: "1px solid var(--surface-border)",
-                }}
-              />
+              <>
+                <img
+                  src={preview}
+                  alt="Vista previa"
+                  style={{
+                    width: "100%",
+                    marginTop: "16px",
+                    borderRadius: "12px",
+                    maxHeight: "220px",
+                    objectFit: "cover",
+                    border: "1px solid var(--surface-border)",
+                  }}
+                />
+
+                <div
+                  style={{
+                    marginTop: "10px",
+                    padding: "10px",
+                    background: "rgba(34, 197, 94, 0.12)",
+                    border: "1px solid rgba(34, 197, 94, 0.3)",
+                    borderRadius: "10px",
+                    color: "#4ade80",
+                    fontSize: "0.9rem",
+                    fontWeight: 600,
+                    textAlign: "center",
+                  }}
+                >
+                  Evidencia lista para enviar
+                </div>
+              </>
             )}
           </div>
 
@@ -430,9 +448,10 @@ export default function Reportar({ auth }) {
                 zoom={15}
                 style={{ height: "100%", width: "100%", zIndex: 1 }}
               >
-                <TileLayer 
-                  attribution='&copy; OpenStreetMap contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <TileLayer
+                  attribution="&copy; OpenStreetMap contributors"
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
                 <LocationPicker position={position} setPosition={setPosition} />
               </MapContainer>
             )}
