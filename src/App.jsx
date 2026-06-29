@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import Registro from "./pages/Registro";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
 import Reportar from "./pages/Reportar";
 import MisReportes from "./pages/MisReportes";
 
@@ -256,6 +257,12 @@ function App() {
                 ) : (
                   <Navigate to={homeByRole(auth.rol)} />
                 )
+              }
+            />
+            <Route
+              path="/verify-email"
+              element={
+                !auth ? <VerifyEmail /> : <Navigate to={homeByRole(auth.rol)} />
               }
             />
 
