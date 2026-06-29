@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import logoBomberos from "../assets/logo_bomberos.png";
@@ -16,6 +16,32 @@ export default function ResetPassword() {
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [validandoToken, setValidandoToken] = useState(true);
+  const [tokenValido, setTokenValido] = useState(false);
+
+  useEffect(() => {
+    const validarToken = async () => {
+      if (!token) {
+        setTokenValido(false);
+        setValidandoToken(false);
+        return;
+      }
+
+      try {
+        const res = await axios.get(`${API_URL}/auth/validate-reset-token`, {
+          params: { token },
+        });
+
+        setTokenValido(res.data === true);
+      } catch (err) {
+        setTokenValido(false);
+      } finally {
+        setValidandoToken(false);
+      }
+    };
+
+    validarToken();
+  }, [token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,7 +73,9 @@ export default function ResetPassword() {
         },
       });
 
-      setMensaje("Contraseña actualizada correctamente. Redirigiendo al login...");
+      setMensaje(
+        "Contraseña actualizada correctamente. Redirigiendo al login...",
+      );
 
       setTimeout(() => {
         navigate("/login");
@@ -55,7 +83,7 @@ export default function ResetPassword() {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          "No se pudo actualizar la contraseña. El enlace puede haber expirado."
+          "No se pudo actualizar la contraseña. El enlace puede haber expirado.",
       );
     } finally {
       setLoading(false);
@@ -99,7 +127,7 @@ export default function ResetPassword() {
           </p>
         </div>
 
-        {!token && (
+        {!validandoToken && !tokenValido && (
           <div
             style={{
               color: "var(--primary)",
@@ -134,6 +162,18 @@ export default function ResetPassword() {
             {error}
           </div>
         )}
+        
+        {validandoToken && (
+          <div
+            style={{
+              color: "var(--text-muted)",
+              marginBottom: "16px",
+              textAlign: "center",
+            }}
+          >
+            Validando enlace de recuperación...
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="input-group">
@@ -145,7 +185,7 @@ export default function ResetPassword() {
               value={nuevaPassword}
               onChange={(e) => setNuevaPassword(e.target.value)}
               required
-              disabled={!token}
+              disabled={!tokenValido}
             />
           </div>
 
@@ -158,7 +198,7 @@ export default function ResetPassword() {
               value={confirmarPassword}
               onChange={(e) => setConfirmarPassword(e.target.value)}
               required
-              disabled={!token}
+              disabled={!tokenValido}
             />
           </div>
 
@@ -166,7 +206,7 @@ export default function ResetPassword() {
             type="submit"
             className="btn-primary"
             style={{ width: "100%", marginTop: "12px" }}
-            disabled={loading || !token}
+            disabled={loading || !tokenValido}
           >
             {loading ? "Actualizando..." : "Actualizar contraseña"}
           </button>
