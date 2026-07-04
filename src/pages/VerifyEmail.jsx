@@ -32,7 +32,7 @@ export default function VerifyEmail() {
         setEstado("error");
         setMensaje(
           err.response?.data?.message ||
-            "El enlace de verificación expiró o ya fue utilizado."
+            "El enlace de verificación expiró o ya fue utilizado.",
         );
       }
     };
@@ -41,15 +41,38 @@ export default function VerifyEmail() {
   }, [token]);
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
-      <div className="glass-panel animate-fade-in" style={{ width: "100%", maxWidth: "420px", padding: "40px", textAlign: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "80vh",
+      }}
+    >
+      <div
+        className="glass-panel animate-fade-in"
+        style={{
+          width: "100%",
+          maxWidth: "420px",
+          padding: "40px",
+          textAlign: "center",
+        }}
+      >
         <img
           src={logoBomberos}
           alt="Logo Bomberos"
-          style={{ width: "64px", height: "64px", objectFit: "contain", margin: "0 auto 20px auto" }}
+          style={{
+            width: "100px",
+            height: "100px",
+            objectFit: "contain",
+            margin: "0 auto 18px auto",
+          }}
         />
 
-        <h2 className="gradient-text" style={{ fontSize: "1.7rem", marginBottom: "12px" }}>
+        <h2
+          className="gradient-text"
+          style={{ fontSize: "1.7rem", marginBottom: "12px" }}
+        >
           Verificación de Cuenta
         </h2>
 
@@ -57,7 +80,17 @@ export default function VerifyEmail() {
           {estado === "validando" ? "⏳" : estado === "ok" ? "✅" : "⚠️"}
         </div>
 
-        <p style={{ color: estado === "ok" ? "#4ade80" : estado === "error" ? "var(--primary)" : "var(--text-muted)", marginBottom: "28px" }}>
+        <p
+          style={{
+            color:
+              estado === "ok"
+                ? "#4ade80"
+                : estado === "error"
+                  ? "var(--primary)"
+                  : "var(--text-muted)",
+            marginBottom: "28px",
+          }}
+        >
           {mensaje}
         </p>
 

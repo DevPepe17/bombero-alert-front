@@ -50,11 +50,10 @@ export default function Login({ onLogin }) {
             src={logoBomberos}
             alt="Logo Bomberos"
             style={{
-              width: "64px",
-              height: "64px",
+              width: "100px",
+              height: "100px",
               objectFit: "contain",
-              margin: "0 auto 16px auto",
-              borderRadius: "16px",
+              margin: "0 auto 18px auto",
             }}
           />
           <h2

@@ -158,9 +158,10 @@ export default function Dashboard({ auth }) {
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "350px 1fr",
-        gap: "24px",
+        gridTemplateColumns: "380px 1fr",
+        gap: "36px",
         height: "80vh",
+        padding: "0 16px",
       }}
     >
       {/* Sidebar - Panel de Control */}
@@ -170,6 +171,7 @@ export default function Dashboard({ auth }) {
           flexDirection: "column",
           gap: "24px",
           overflowY: "auto",
+          paddingRight: "18px",
         }}
       >
         <div className="glass-panel" style={{ padding: "24px" }}>
@@ -292,7 +294,7 @@ export default function Dashboard({ auth }) {
                       color: "var(--primary)",
                     }}
                   >
-                    <span>🚒 {estacion.nombre}</span>
+                    <span>{estacion.nombre}</span>
                     <span
                       style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}
                     >

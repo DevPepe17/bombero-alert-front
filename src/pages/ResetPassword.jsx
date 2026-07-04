@@ -108,10 +108,10 @@ export default function ResetPassword() {
             src={logoBomberos}
             alt="Logo Bomberos"
             style={{
-              width: "64px",
-              height: "64px",
+              width: "100px",
+              height: "100px",
               objectFit: "contain",
-              margin: "0 auto 16px auto",
+              margin: "0 auto 18px auto",
             }}
           />
 
@@ -162,7 +162,7 @@ export default function ResetPassword() {
             {error}
           </div>
         )}
-        
+
         {validandoToken && (
           <div
             style={{

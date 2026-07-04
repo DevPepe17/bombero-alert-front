@@ -130,10 +130,10 @@ export default function AdminDashboard({ auth }) {
       {/* ── Header ── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '36px' }}>
         <div>
-          <h1 className="gradient-text" style={{ fontSize: '2.4rem', fontWeight: 800, marginBottom: '6px' }}>
+          <h1 className="page-title" style={{ fontSize: '2.4rem', fontWeight: 800, marginBottom: '6px' }}>
             Panel de Administración
           </h1>
-          <p style={{ color: 'var(--text-muted)' }}>
+          <p className="page-subtitle">
             Métricas en tiempo real del sistema de emergencias
           </p>
         </div>

@@ -84,14 +84,35 @@ function App() {
                 <img
                   src={logoBomberos}
                   alt="Logo Bomberos"
-                  style={{ width: "48px", height: "48px", marginRight: "10px" }}
+                  style={{
+                    width: "82px",
+                    height: "82px",
+                    marginRight: "14px",
+                  }}
                 />
-                <h3>
-                  Emergencias{" "}
-                  <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>
-                    | Perú
+                <div style={{ lineHeight: 1.15 }}>
+                  <h3
+                    style={{
+                      color: "var(--text-main)",
+                      fontWeight: 700,
+                      margin: 0,
+                      fontSize: "1.25rem",
+                    }}
+                  >
+                    Central de Emergencias
+                  </h3>
+
+                  <span
+                    style={{
+                      color: "#6B7280",
+                      fontSize: "0.82rem",
+                      fontWeight: 500,
+                      letterSpacing: "0.3px",
+                    }}
+                  >
+                    Cuerpo General de Bomberos del Perú
                   </span>
-                </h3>
+                </div>
               </div>
 
               <div
@@ -99,25 +120,35 @@ function App() {
               >
                 {/* Nav Ciudadano */}
                 {auth.rol === "CIUDADANO" && (
-                  <nav style={{ display: "flex", gap: "16px" }}>
+                  <nav
+                    style={{
+                      display: "flex",
+                      gap: "28px",
+                      alignItems: "center",
+                    }}
+                  >
                     <Link
                       to="/reportar"
+                      className="nav-link"
                       style={{
-                        color: "white",
+                        color: "var(--text-main)",
                         textDecoration: "none",
-                        fontSize: "0.9rem",
-                        fontWeight: 500,
+                        fontSize: "1rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.2px",
                       }}
                     >
                       Nuevo Reporte
                     </Link>
                     <Link
                       to="/mis-reportes"
+                      className="nav-link"
                       style={{
-                        color: "white",
+                        color: "var(--text-main)",
                         textDecoration: "none",
-                        fontSize: "0.9rem",
-                        fontWeight: 500,
+                        fontSize: "1rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.2px",
                       }}
                     >
                       Mis Reportes
@@ -127,25 +158,35 @@ function App() {
 
                 {/* Nav Operador */}
                 {auth.rol === "OPERADOR" && (
-                  <nav style={{ display: "flex", gap: "16px" }}>
+                  <nav
+                    style={{
+                      display: "flex",
+                      gap: "28px",
+                      alignItems: "center",
+                    }}
+                  >
                     <Link
                       to="/dashboard"
+                      className="nav-link"
                       style={{
-                        color: "white",
+                        color: "var(--text-main)",
                         textDecoration: "none",
-                        fontSize: "0.9rem",
-                        fontWeight: 500,
+                        fontSize: "1rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.2px",
                       }}
                     >
                       Monitor de Mapa
                     </Link>
                     <Link
                       to="/reportes-pendientes"
+                      className="nav-link"
                       style={{
-                        color: "white",
+                        color: "var(--text-main)",
                         textDecoration: "none",
-                        fontSize: "0.9rem",
-                        fontWeight: 500,
+                        fontSize: "1rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.2px",
                       }}
                     >
                       Bandeja de Reportes
@@ -155,55 +196,76 @@ function App() {
 
                 {/* Nav Administrador */}
                 {auth.rol === "ADMINISTRADOR" && (
-                  <nav style={{ display: "flex", gap: "16px" }}>
-                    <Link
-                      to="/admin"
-                      style={{
-                        color: "white",
-                        textDecoration: "none",
-                        fontSize: "0.9rem",
-                        fontWeight: 500,
-                      }}
-                    >
-                      📊 Panel Admin
-                    </Link>
-                  </nav>
+                  <nav
+                    style={{
+                      display: "flex",
+                      gap: "28px",
+                      alignItems: "center",
+                    }}
+                  ></nav>
                 )}
 
                 {/* Usuario + Salir */}
                 <div
                   style={{
                     display: "flex",
+                    alignItems: "flex-start",
                     gap: "16px",
-                    alignItems: "center",
-                    borderLeft: "1px solid rgba(255,255,255,0.1)",
-                    paddingLeft: "24px",
                   }}
                 >
-                  <span
-                    style={{ fontSize: "0.9rem", color: "var(--text-muted)" }}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      gap: "4px",
+                    }}
                   >
-                    {auth.nombreCompleto}{" "}
                     <span
                       style={{
-                        color:
-                          auth.rol === "ADMINISTRADOR"
-                            ? "#BF5AF2"
-                            : auth.rol === "OPERADOR"
-                              ? "#30D158"
-                              : "#FF9500",
-                        fontWeight: 600,
+                        fontSize: "0.95rem",
+                        fontWeight: 700,
+                        color: "var(--text-main)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
                       }}
                     >
-                      ({auth.rol})
+                      👤 {auth.nombreCompleto}
                     </span>
-                  </span>
+                    <span
+                      style={{
+                        padding: "3px 10px",
+                        borderRadius: "999px",
+                        fontSize: "0.72rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.5px",
+                        background:
+                          auth.rol === "ADMINISTRADOR"
+                            ? "#F3E8FF"
+                            : auth.rol === "OPERADOR"
+                              ? "#DCFCE7"
+                              : "#FEE2E2",
+                        color:
+                          auth.rol === "ADMINISTRADOR"
+                            ? "#7E22CE"
+                            : auth.rol === "OPERADOR"
+                              ? "#15803D"
+                              : "#CE2029",
+                      }}
+                    >
+                      {auth.rol === "ADMINISTRADOR" ? "ADMIN" : auth.rol}
+                    </span>
+                  </div>
                   <button
                     className="btn-secondary"
                     onClick={logout}
-                    style={{ padding: "8px 16px", fontSize: "0.85rem" }}
+                    style={{
+                      padding: "8px 16px",
+                      fontSize: "0.82rem",
+                    }}
                   >
-                    Salir
+                    Cerrar sesión
                   </button>
                 </div>
               </div>

@@ -164,12 +164,16 @@ export default function Reportar({ auth }) {
     >
       <div style={{ marginBottom: "32px" }}>
         <h2
-          className="gradient-text"
-          style={{ fontSize: "2.2rem", marginBottom: "8px" }}
+          className="page-title"
+          style={{
+            fontSize: "2.2rem",
+            marginBottom: "8px",
+            fontWeight: 800,
+          }}
         >
           Reportar Emergencia
         </h2>
-        <p style={{ color: "var(--text-muted)" }}>
+        <p className="page-subtitle">
           Completa la información para despachar ayuda inmediatamente.
         </p>
       </div>
@@ -363,12 +367,10 @@ export default function Reportar({ auth }) {
                   src={preview}
                   alt="Vista previa"
                   style={{
-                    width: "100%",
-                    marginTop: "16px",
-                    borderRadius: "12px",
-                    maxHeight: "220px",
-                    objectFit: "cover",
-                    border: "1px solid var(--surface-border)",
+                    width: "88px",
+                    height: "88px",
+                    objectFit: "contain",
+                    margin: "0 auto 18px auto",
                   }}
                 />
 

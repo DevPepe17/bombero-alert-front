@@ -111,12 +111,16 @@ export default function ReportesOperador({ auth }) {
       >
         <div>
           <h2
-            className="gradient-text"
-            style={{ fontSize: "2.2rem", marginBottom: "8px" }}
+            className="page-title"
+            style={{
+              fontSize: "2.2rem",
+              marginBottom: "8px",
+              fontWeight: 800,
+            }}
           >
             Gestión Operativa de Emergencias
           </h2>
-          <p style={{ color: "var(--text-muted)" }}>
+          <p className="page-subtitle">
             Gestión, búsqueda y asignación de unidades para emergencias en cola.
             Ordenados por prioridad.
           </p>
@@ -151,7 +155,7 @@ export default function ReportesOperador({ auth }) {
             display: "flex",
             alignItems: "center",
             gap: "12px",
-            background: "rgba(0,0,0,0.3)",
+            background: "#FFFFFF",
             padding: "12px 16px",
             borderRadius: "12px",
             border: "1px solid var(--surface-border)",
@@ -166,7 +170,7 @@ export default function ReportesOperador({ auth }) {
             style={{
               background: "transparent",
               border: "none",
-              color: "white",
+              color: "var(--text-main)",
               flex: 1,
               outline: "none",
               fontSize: "1rem",

@@ -714,7 +714,7 @@ export default function TicketDetalle({ auth }) {
                               color: "var(--primary)",
                             }}
                           >
-                            🚒 Unidades Despachadas
+                            Unidades Despachadas
                           </div>
 
                           {reporte.unidadesDespachadas.map((unidad) => (
@@ -868,7 +868,7 @@ export default function TicketDetalle({ auth }) {
                       color: "var(--text-muted)",
                     }}
                   >
-                    🚒 {unidad.codigo} despachada
+                    {unidad.codigo} despachada
                     <br />
                     <span style={{ color: "rgba(255,255,255,0.65)" }}>
                       {new Date(unidad.fechaAsignacion).toLocaleString()}
