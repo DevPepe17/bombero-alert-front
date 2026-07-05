@@ -142,9 +142,15 @@ export default function ResetPassword() {
         {mensaje && (
           <div
             style={{
-              color: "#4ade80",
+              background: "rgba(34, 197, 94, 0.12)",
+              border: "1px solid rgba(34, 197, 94, 0.35)",
+              color: "#15803D",
+              padding: "12px",
+              borderRadius: "8px",
               marginBottom: "16px",
               textAlign: "center",
+              fontSize: "0.9rem",
+              lineHeight: 1.5,
             }}
           >
             {mensaje}
@@ -154,9 +160,15 @@ export default function ResetPassword() {
         {error && (
           <div
             style={{
+              background: "rgba(206, 32, 41, 0.1)",
+              border: "1px solid rgba(206, 32, 41, 0.35)",
               color: "var(--primary)",
+              padding: "12px",
+              borderRadius: "8px",
               marginBottom: "16px",
               textAlign: "center",
+              fontSize: "0.9rem",
+              lineHeight: 1.5,
             }}
           >
             {error}

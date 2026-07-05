@@ -120,6 +120,7 @@ export default function Registro() {
                 className="input-control"
                 value={formData.nombre}
                 onChange={handleChange}
+                autoComplete="given-name"
                 required
               />
             </div>
@@ -131,6 +132,7 @@ export default function Registro() {
                 className="input-control"
                 value={formData.apellido}
                 onChange={handleChange}
+                autoComplete="family-name"
                 required
               />
             </div>
@@ -151,6 +153,8 @@ export default function Registro() {
                 className="input-control"
                 value={formData.dni}
                 onChange={handleChange}
+                inputMode="numeric"
+                autoComplete="off"
                 maxLength="8"
                 required
               />
@@ -163,6 +167,8 @@ export default function Registro() {
                 className="input-control"
                 value={formData.telefono}
                 onChange={handleChange}
+                inputMode="tel"
+                autoComplete="tel"
                 required
               />
             </div>
@@ -176,6 +182,7 @@ export default function Registro() {
               className="input-control"
               value={formData.email}
               onChange={handleChange}
+              autoComplete="email"
               required
             />
           </div>
@@ -188,6 +195,7 @@ export default function Registro() {
               className="input-control"
               value={formData.password}
               onChange={handleChange}
+              autoComplete="new-password"
               minLength="6"
               required
             />
@@ -199,7 +207,7 @@ export default function Registro() {
             style={{ width: "100%", marginTop: "12px" }}
             disabled={loading}
           >
-            {loading ? "Registrando..." : "Crear Cuenta y Entrar"}
+            {loading ? "Registrando..." : "Crear Cuenta"}
           </button>
         </form>
 

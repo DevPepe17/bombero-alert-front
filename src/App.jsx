@@ -82,6 +82,7 @@ function App() {
             <div className="container header-content">
               <div className="brand">
                 <img
+                  className="header-logo"
                   src={logoBomberos}
                   alt="Logo Bomberos"
                   style={{
@@ -90,8 +91,9 @@ function App() {
                     marginRight: "14px",
                   }}
                 />
-                <div style={{ lineHeight: 1.15 }}>
+                <div className="brand-text" style={{ lineHeight: 1.15 }}>
                   <h3
+                    className="brand-title"
                     style={{
                       color: "var(--text-main)",
                       fontWeight: 700,
@@ -103,6 +105,7 @@ function App() {
                   </h3>
 
                   <span
+                    className="brand-subtitle"
                     style={{
                       color: "#6B7280",
                       fontSize: "0.82rem",
@@ -116,11 +119,13 @@ function App() {
               </div>
 
               <div
+                className="header-actions"
                 style={{ display: "flex", gap: "24px", alignItems: "center" }}
               >
                 {/* Nav Ciudadano */}
                 {auth.rol === "CIUDADANO" && (
                   <nav
+                    className="header-nav"
                     style={{
                       display: "flex",
                       gap: "28px",
@@ -159,6 +164,7 @@ function App() {
                 {/* Nav Operador */}
                 {auth.rol === "OPERADOR" && (
                   <nav
+                    className="header-nav"
                     style={{
                       display: "flex",
                       gap: "28px",
@@ -197,6 +203,7 @@ function App() {
                 {/* Nav Administrador */}
                 {auth.rol === "ADMINISTRADOR" && (
                   <nav
+                    className="header-nav"
                     style={{
                       display: "flex",
                       gap: "28px",
@@ -207,6 +214,7 @@ function App() {
 
                 {/* Usuario + Salir */}
                 <div
+                  className="header-user"
                   style={{
                     display: "flex",
                     alignItems: "flex-start",
@@ -214,6 +222,7 @@ function App() {
                   }}
                 >
                   <div
+                    className="header-user-info"
                     style={{
                       display: "flex",
                       flexDirection: "column",
@@ -258,7 +267,7 @@ function App() {
                     </span>
                   </div>
                   <button
-                    className="btn-secondary"
+                    className="btn-secondary logout-button"
                     onClick={logout}
                     style={{
                       padding: "8px 16px",
@@ -275,7 +284,7 @@ function App() {
 
         {/* ── Rutas ──────────────────────────────────────────────────────── */}
         <main
-          className="container"
+          className="container app-main"
           style={{ paddingTop: "40px", paddingBottom: "60px" }}
         >
           <Routes>

@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMapEvents,
+} from "react-leaflet";
+import L from "leaflet";
+import EstacionBomberos from "../assets/estacion_bomberos.png";
 import {
   Flame,
   LifeBuoy,
@@ -15,6 +23,12 @@ const API_URL =
   import.meta.env.VITE_API_URL || "https://bombero-alert-api.onrender.com/api";
 const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+const estacionIcon = new L.Icon({
+  iconUrl: EstacionBomberos,
+  iconSize: [72, 72],
+  iconAnchor: [36, 72],
+  popupAnchor: [0, -65],
+});
 
 function LocationPicker({ position, setPosition }) {
   useMapEvents({
@@ -34,6 +48,7 @@ export default function Reportar({ auth }) {
 
   const [imagen, setImagen] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [estaciones, setEstaciones] = useState([]);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -47,12 +62,47 @@ export default function Reportar({ auth }) {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchEstaciones = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/estaciones`, {
+          headers: {
+            Authorization: `Bearer ${auth.token}`,
+          },
+        });
+
+        setEstaciones(response.data);
+      } catch (error) {
+        console.error("Error al cargar estaciones:", error);
+      }
+    };
+
+    fetchEstaciones();
+  }, [auth.token]);
+
   const handleImagenChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setImagen(file);
     setPreview(URL.createObjectURL(file));
+  };
+
+  const limpiarFormulario = () => {
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
+
+    setImagen(null);
+    setPreview(null);
+    setDescripcion("");
+    setTipoIncidente("INCENDIO");
+
+    const inputFoto = document.getElementById("foto-reporte");
+
+    if (inputFoto) {
+      inputFoto.value = "";
+    }
   };
 
   const subirImagenACloudinary = async () => {
@@ -93,6 +143,7 @@ export default function Reportar({ auth }) {
         },
       );
 
+      limpiarFormulario();
       setSuccess(true);
     } catch (err) {
       alert(err.response?.data?.message || "Error al enviar reporte");
@@ -138,10 +189,7 @@ export default function Reportar({ auth }) {
         </p>
         <button
           className="btn-secondary"
-          onClick={() => {
-            setSuccess(false);
-            setDescripcion("");
-          }}
+          onClick={() => setSuccess(false)}
           style={{ padding: "14px 32px" }}
         >
           Enviar un nuevo reporte
@@ -179,6 +227,7 @@ export default function Reportar({ auth }) {
       </div>
 
       <div
+        className="citizen-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))",
@@ -455,6 +504,33 @@ export default function Reportar({ auth }) {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <LocationPicker position={position} setPosition={setPosition} />
+                {estaciones
+                  .filter(
+                    (estacion) =>
+                      Number.isFinite(Number(estacion.latitud)) &&
+                      Number.isFinite(Number(estacion.longitud)),
+                  )
+                  .map((estacion) => (
+                    <Marker
+                      key={`estacion-${estacion.id}`}
+                      position={[
+                        Number(estacion.latitud),
+                        Number(estacion.longitud),
+                      ]}
+                      icon={estacionIcon}
+                    >
+                      <Popup>
+                        <div style={{ color: "#0D1B2A", minWidth: "190px" }}>
+                          <strong>{estacion.nombre}</strong>
+
+                          <div style={{ marginTop: "8px", lineHeight: 1.5 }}>
+                            <div>📍 {estacion.distrito}</div>
+                            <div>🏠 {estacion.direccion}</div>
+                          </div>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ))}
               </MapContainer>
             )}
           </div>

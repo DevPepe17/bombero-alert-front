@@ -658,10 +658,11 @@ export default function TicketDetalle({ auth }) {
                       disabled={ticketCerrado}
                       className="input-control"
                       style={{
-                        borderRadius: "4px",
-                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        padding: "10px 12px",
                         border: "1px solid var(--success)",
-                        background: "rgba(52,199,89,0.05)",
+                        background: "#FFFFFF",
+                        color: "var(--text-main)",
                       }}
                       value={formData.unidadAsignada}
                       onChange={(e) =>
@@ -671,11 +672,24 @@ export default function TicketDetalle({ auth }) {
                         })
                       }
                     >
-                      <option value="">
+                      <option
+                        value=""
+                        style={{
+                          color: "var(--text-muted)",
+                          background: "#FFFFFF",
+                        }}
+                      >
                         -- Seleccionar Unidad (Opcional) --
                       </option>
                       {unidades.map((u) => (
-                        <option key={u.id} value={u.id}>
+                        <option
+                          key={u.id}
+                          value={u.id}
+                          style={{
+                            color: "var(--text-main)",
+                            background: "#FFFFFF",
+                          }}
+                        >
                           {u.codigo} ({u.tipo})
                         </option>
                       ))}
@@ -703,8 +717,9 @@ export default function TicketDetalle({ auth }) {
                             marginTop: "16px",
                             padding: "12px",
                             borderRadius: "8px",
-                            background: "rgba(255,255,255,0.04)",
+                            background: "#F8FAFC",
                             border: "1px solid var(--surface-border)",
+                            color: "var(--text-main)",
                           }}
                         >
                           <div

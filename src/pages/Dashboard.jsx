@@ -200,13 +200,21 @@ export default function Dashboard({ auth }) {
                 <div
                   key={rep.id}
                   style={{
-                    background: "rgba(0,0,0,0.3)",
+                    background: "#F8FAFC",
                     padding: "16px",
                     borderRadius: "12px",
+                    border: "1px solid var(--surface-border)",
                     borderLeft: "4px solid var(--primary)",
+                    boxShadow: "0 3px 10px rgba(13, 27, 42, 0.06)",
                   }}
                 >
-                  <div style={{ fontWeight: "bold", marginBottom: "8px" }}>
+                  <div
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: "8px",
+                      color: "var(--text-main)",
+                    }}
+                  >
                     {rep.tipoIncidente}
                   </div>
                   <div
@@ -222,6 +230,7 @@ export default function Dashboard({ auth }) {
                     <div
                       style={{
                         fontSize: "0.9rem",
+                        color: "var(--text-main)",
                         display: "-webkit-box",
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: "vertical",
@@ -278,9 +287,12 @@ export default function Dashboard({ auth }) {
                 <div
                   key={estacion.id}
                   style={{
-                    background: "rgba(255,255,255,0.04)",
+                    background: "#F8FAFC",
                     borderRadius: "10px",
                     padding: "12px",
+                    border: "1px solid var(--surface-border)",
+                    boxShadow: "0 2px 8px rgba(13, 27, 42, 0.05)",
+                    color: "var(--text-main)",
                   }}
                 >
                   <div
@@ -378,12 +390,15 @@ export default function Dashboard({ auth }) {
             top: "16px",
             left: "160px",
             zIndex: 1000,
-            background: "rgba(0,0,0,0.75)",
-            padding: "10px",
-            borderRadius: "10px",
+            background: "rgba(43, 13, 16, 0.94)",
+            padding: "12px",
+            borderRadius: "12px",
             display: "flex",
             flexDirection: "column",
             gap: "10px",
+            border: "1px solid rgba(255, 255, 255, 0.16)",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.28)",
+            color: "#FFFFFF",
           }}
         >
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>

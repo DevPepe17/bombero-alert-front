@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import logoBomberos from "../assets/logo_bomberos.png";
 
@@ -7,6 +7,8 @@ const API_URL =
   import.meta.env.VITE_API_URL || "https://bombero-alert-api.onrender.com/api";
 
 export default function Login({ onLogin }) {
+  const location = useLocation();
+  const mensajeRegistro = location.state?.mensaje;
   const [email, setEmail] = useState("admin@bomberos.pe");
   const [password, setPassword] = useState("admin123");
   const [error, setError] = useState("");
@@ -67,6 +69,24 @@ export default function Login({ onLogin }) {
           </p>
         </div>
 
+        {mensajeRegistro && (
+          <div
+            style={{
+              background: "rgba(34, 197, 94, 0.12)",
+              border: "1px solid rgba(34, 197, 94, 0.35)",
+              color: "#15803D",
+              padding: "14px",
+              borderRadius: "10px",
+              marginBottom: "20px",
+              fontSize: "0.9rem",
+              lineHeight: 1.5,
+              textAlign: "center",
+              fontWeight: 600,
+            }}
+          >
+            {mensajeRegistro}
+          </div>
+        )}
         {error && (
           <div
             style={{
@@ -92,6 +112,7 @@ export default function Login({ onLogin }) {
               placeholder="ejemplo@bomberos.pe"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               required
             />
           </div>
@@ -103,6 +124,7 @@ export default function Login({ onLogin }) {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
               required
             />
           </div>

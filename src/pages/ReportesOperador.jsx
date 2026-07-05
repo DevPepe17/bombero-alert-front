@@ -53,21 +53,45 @@ export default function ReportesOperador({ auth }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let componenteActivo = true;
+    let peticionEnCurso = false;
+
     const fetchReportes = async () => {
+      if (peticionEnCurso) return;
+
+      peticionEnCurso = true;
+
       try {
         const response = await axios.get(`${API_URL}/reportes/pendientes`, {
-          headers: { Authorization: `Bearer ${auth.token}` },
+          headers: {
+            Authorization: `Bearer ${auth.token}`,
+          },
         });
-        setReportes(response.data);
+
+        if (componenteActivo) {
+          setReportes(response.data);
+        }
       } catch (error) {
-        console.error("Error al cargar reportes:", error);
+        if (componenteActivo) {
+          console.error("Error al cargar reportes:", error);
+        }
       } finally {
-        setLoading(false);
+        peticionEnCurso = false;
+
+        if (componenteActivo) {
+          setLoading(false);
+        }
       }
     };
+
     fetchReportes();
-    const interval = setInterval(fetchReportes, 15000);
-    return () => clearInterval(interval);
+
+    const interval = setInterval(fetchReportes, 30000);
+
+    return () => {
+      componenteActivo = false;
+      clearInterval(interval);
+    };
   }, [auth.token]);
 
   const filteredReportes = reportes
@@ -411,7 +435,12 @@ export default function ReportesOperador({ auth }) {
                     }}
                   >
                     <h3
-                      style={{ margin: 0, fontSize: "1.3rem", color: "white" }}
+                      style={{
+                        color: "var(--text-main)",
+                        fontWeight: 800,
+                        fontSize: "1.1rem",
+                        margin: 0,
+                      }}
                     >
                       {rep.tipoIncidente}
                     </h3>
