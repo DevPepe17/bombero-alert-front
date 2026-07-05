@@ -1,37 +1,56 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { Link } from 'react-router-dom';
-import L from 'leaflet';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { Link } from "react-router-dom";
+import L from "leaflet";
+import MarcadorEmergencia from "../assets/marcador_emergencia.png";
+import EstacionBomberos from "../assets/estacion_bomberos.png";
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://bombero-alert-api.onrender.com/api';
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://bombero-alert-api.onrender.com/api";
 
 // Custom icons for Map
 const reportIcon = new L.Icon({
-  iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+  iconUrl: MarcadorEmergencia,
+  iconSize: [64, 64],
+  iconAnchor: [32, 64],
+  popupAnchor: [0, -55],
+});
+
+const estacionIcon = new L.Icon({
+  iconUrl: EstacionBomberos,
+  iconSize: [72, 72],
+  iconAnchor: [36, 72],
+  popupAnchor: [0, -65],
 });
 
 export default function Dashboard({ auth }) {
   const [reportes, setReportes] = useState([]);
   const [unidades, setUnidades] = useState([]);
+  const [estaciones, setEstaciones] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sectorSeleccionado, setSectorSeleccionado] = useState("TODOS");
+  const [companiasAbiertas, setCompaniasAbiertas] = useState({});
 
   const fetchData = async () => {
     try {
       const headers = { Authorization: `Bearer ${auth.token}` };
-      
-      const [resReportes, resUnidades] = await Promise.all([
+
+      const [resReportes, resUnidades, resEstaciones] = await Promise.all([
         axios.get(`${API_URL}/reportes/pendientes`, { headers }),
-        axios.get(`${API_URL}/unidades/disponibles`, { headers })
+        axios.get(`${API_URL}/unidades/disponibles`, { headers }),
+        axios.get(`${API_URL}/estaciones`, { headers }), // Obtenemos las estaciones para mostrarlas en el mapa
       ]);
-      
-      setReportes(resReportes.data);
+
+      const reportesOperativos = resReportes.data.filter(
+        (rep) =>
+          rep.estado === "EN_COLA" ||
+          rep.estado === "ACTIVO" ||
+          rep.estado === "PENDIENTE",
+      );
+      setReportes(reportesOperativos);
       setUnidades(resUnidades.data);
+      setEstaciones(resEstaciones.data); // Visualizamos las estaciones en el mapa.
     } catch (err) {
       console.error(err);
     } finally {
@@ -47,65 +66,482 @@ export default function Dashboard({ auth }) {
 
   const reportesVisibles = reportes.slice(0, 4);
 
+  const obtenerSector = (distrito) => {
+    const limaSur = [
+      "Chorrillos",
+      "Barranco",
+      "Miraflores",
+      "San Juan de Miraflores",
+      "Santiago de Surco",
+    ];
+
+    const limaNorte = [
+      "Comas",
+      "Los Olivos",
+      "Independencia",
+      "San Martín de Porres",
+      "Puente Piedra",
+    ];
+
+    const limaCentro = ["Cercado de Lima", "Breña", "Magdalena"];
+
+    const callao = ["Bellavista", "Callao"];
+
+    if (limaSur.includes(distrito)) return "LIMA_SUR";
+    if (limaCentro.includes(distrito)) return "LIMA_CENTRO";
+    if (callao.includes(distrito)) return "CALLAO";
+    if (limaNorte.includes(distrito)) return "LIMA_NORTE";
+
+    return "LIMA_NORTE";
+  };
+
+  const estacionesFiltradas =
+    sectorSeleccionado === "TODOS"
+      ? estaciones
+      : estaciones.filter(
+          (estacion) => obtenerSector(estacion.distrito) === sectorSeleccionado,
+        );
+
+  const estacionesPorSector = estaciones.reduce((acc, estacion) => {
+    const sector = obtenerSector(estacion.distrito);
+
+    if (!acc[sector]) {
+      acc[sector] = [];
+    }
+
+    acc[sector].push(estacion);
+    return acc;
+  }, {});
+
+  const sectoresOrdenados = [
+    { key: "LIMA_SUR", label: "Lima Sur" },
+    { key: "LIMA_CENTRO", label: "Lima Centro" },
+    { key: "LIMA_NORTE", label: "Lima Norte" },
+    { key: "CALLAO", label: "Callao" },
+  ];
+
+  const unidadesAgrupadas = estacionesFiltradas.map((estacion) => ({
+    ...estacion,
+    unidadesOperativas: estacion.unidades || [],
+  }));
+
+  const extraerNumeroCompania = (nombre) => {
+    const match = nombre.match(/N°\s*(\d+)/);
+    return match ? Number(match[1]) : 999;
+  };
+
+  const unidadesAgrupadasOrdenadas = [...unidadesAgrupadas].sort(
+    (a, b) => extraerNumeroCompania(a.nombre) - extraerNumeroCompania(b.nombre),
+  );
+  const unidadesDelSector = estacionesFiltradas.flatMap(
+    (estacion) => estacion.unidades || [],
+  );
+
+  const totalEstaciones = estacionesFiltradas.length;
+
+  const totalDisponibles = unidadesDelSector.filter(
+    (unidad) => unidad.estado === "DISPONIBLE",
+  ).length;
+
+  const totalOcupadas = unidadesDelSector.filter(
+    (unidad) => unidad.estado !== "DISPONIBLE",
+  ).length;
+  const totalEmergencias = reportes.length;
+  const toggleCompania = (id) => {
+    setCompaniasAbiertas((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: '24px', height: '80vh' }}>
-      
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "380px 1fr",
+        gap: "36px",
+        height: "80vh",
+        padding: "0 16px",
+      }}
+    >
       {/* Sidebar - Panel de Control */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', overflowY: 'auto' }}>
-        
-        <div className="glass-panel" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 className="gradient-text" style={{ margin: 0 }}>Reportes Pendientes ({reportes.length})</h3>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "24px",
+          overflowY: "auto",
+          paddingRight: "18px",
+        }}
+      >
+        <div className="glass-panel" style={{ padding: "24px" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "16px",
+            }}
+          >
+            <h3 className="gradient-text" style={{ margin: 0 }}>
+              Reportes Pendientes ({reportes.length})
+            </h3>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+          >
             {reportes.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No hay reportes pendientes.</p>
-            ) : reportesVisibles.map(rep => (
-              <div key={rep.id} style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '12px', borderLeft: '4px solid var(--primary)' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>{rep.tipoIncidente}</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                  {new Date(rep.timestamp).toLocaleTimeString()}
+              <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
+                No hay reportes pendientes.
+              </p>
+            ) : (
+              reportesVisibles.map((rep) => (
+                <div
+                  key={rep.id}
+                  style={{
+                    background: "#F8FAFC",
+                    padding: "16px",
+                    borderRadius: "12px",
+                    border: "1px solid var(--surface-border)",
+                    borderLeft: "4px solid var(--primary)",
+                    boxShadow: "0 3px 10px rgba(13, 27, 42, 0.06)",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: "8px",
+                      color: "var(--text-main)",
+                    }}
+                  >
+                    {rep.tipoIncidente}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "0.85rem",
+                      color: "var(--text-muted)",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    {new Date(rep.timestamp).toLocaleTimeString()}
+                  </div>
+                  {rep.descripcion && (
+                    <div
+                      style={{
+                        fontSize: "0.9rem",
+                        color: "var(--text-main)",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
+                      "{rep.descripcion}"
+                    </div>
+                  )}
                 </div>
-                {rep.descripcion && <div style={{ fontSize: '0.9rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>"{rep.descripcion}"</div>}
-              </div>
-            ))}
+              ))
+            )}
           </div>
-          
-          <Link 
+
+          <Link
             to="/reportes-pendientes"
-            className="btn-secondary" 
-            style={{ width: '100%', marginTop: '16px', padding: '10px', fontSize: '0.9rem', textDecoration: 'none', display: 'block', textAlign: 'center' }}
+            className="btn-secondary"
+            style={{
+              width: "100%",
+              marginTop: "16px",
+              padding: "10px",
+              fontSize: "0.9rem",
+              textDecoration: "none",
+              display: "block",
+              textAlign: "center",
+            }}
           >
             Abrir Bandeja de Reportes...
           </Link>
         </div>
 
-        <div className="glass-panel" style={{ padding: '24px' }}>
-          <h3 className="gradient-text" style={{ marginBottom: '16px', color: 'var(--success)' }}>Unidades Libres ({unidades.length})</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {unidades.map(u => (
-              <div key={u.id} style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px', fontSize: '0.9rem' }}>
-                <span style={{ fontWeight: 600 }}>{u.codigo}</span>
-                <span style={{ color: 'var(--text-muted)' }}>{u.tipo}</span>
+        <div className="glass-panel" style={{ padding: "24px" }}>
+          <h3 className="gradient-text" style={{ marginBottom: "4px" }}>
+            Disponibilidad por Compañía
+          </h3>
+          <p
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "0.8rem",
+              marginBottom: "16px",
+            }}
+          >
+            {sectorSeleccionado === "TODOS"
+              ? "Mostrando todos los sectores"
+              : `Mostrando ${sectoresOrdenados.find((s) => s.key === sectorSeleccionado)?.label}`}
+          </p>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+          >
+            {unidadesAgrupadasOrdenadas.map((estacion) => {
+              const abierta = companiasAbiertas[estacion.id];
+
+              return (
+                <div
+                  key={estacion.id}
+                  style={{
+                    background: "#F8FAFC",
+                    borderRadius: "10px",
+                    padding: "12px",
+                    border: "1px solid var(--surface-border)",
+                    boxShadow: "0 2px 8px rgba(13, 27, 42, 0.05)",
+                    color: "var(--text-main)",
+                  }}
+                >
+                  <div
+                    onClick={() => toggleCompania(estacion.id)}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                      fontWeight: 700,
+                      color: "var(--primary)",
+                    }}
+                  >
+                    <span>{estacion.nombre}</span>
+                    <span
+                      style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}
+                    >
+                      {abierta ? "▼" : "▶"} {estacion.unidadesOperativas.length}
+                    </span>
+                  </div>
+
+                  {!abierta && (
+                    <div
+                      style={{
+                        marginTop: "6px",
+                        color: "var(--text-muted)",
+                        fontSize: "0.8rem",
+                      }}
+                    >
+                      🟢{" "}
+                      {
+                        estacion.unidadesOperativas.filter(
+                          (u) => u.estado === "DISPONIBLE",
+                        ).length
+                      }{" "}
+                      disponibles • 🔴{" "}
+                      {
+                        estacion.unidadesOperativas.filter(
+                          (u) => u.estado !== "DISPONIBLE",
+                        ).length
+                      }{" "}
+                      ocupadas
+                    </div>
+                  )}
+
+                  {abierta && (
+                    <div style={{ marginTop: "10px" }}>
+                      {estacion.unidadesOperativas.length === 0 ? (
+                        <div
+                          style={{
+                            color: "var(--text-muted)",
+                            fontSize: "0.85rem",
+                          }}
+                        >
+                          Sin unidades disponibles
+                        </div>
+                      ) : (
+                        estacion.unidadesOperativas.map((u) => (
+                          <div
+                            key={u.id}
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              padding: "6px 0",
+                              fontSize: "0.85rem",
+                            }}
+                          >
+                            <span>
+                              {u.estado === "DISPONIBLE" ? "🟢" : "🔴"}{" "}
+                              <strong>{u.codigo}</strong>
+                            </span>
+                            <span style={{ color: "var(--text-muted)" }}>
+                              {u.tipo}
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Map */}
+      <div
+        className="glass-panel"
+        style={{ height: "100%", overflow: "hidden", position: "relative" }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: "16px",
+            left: "160px",
+            zIndex: 1000,
+            background: "rgba(43, 13, 16, 0.94)",
+            padding: "12px",
+            borderRadius: "12px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            border: "1px solid rgba(255, 255, 255, 0.16)",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.28)",
+            color: "#FFFFFF",
+          }}
+        >
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            {[
+              { key: "TODOS", label: "Todos" },
+              { key: "LIMA_SUR", label: "Lima Sur" },
+              { key: "LIMA_CENTRO", label: "Lima Centro" },
+              { key: "LIMA_NORTE", label: "Lima Norte" },
+              { key: "CALLAO", label: "Callao" },
+            ].map((sector) => (
+              <button
+                key={sector.key}
+                onClick={() => setSectorSeleccionado(sector.key)}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "20px",
+                  border:
+                    sectorSeleccionado === sector.key
+                      ? "1px solid var(--primary)"
+                      : "1px solid var(--surface-border)",
+                  background:
+                    sectorSeleccionado === sector.key
+                      ? "rgba(255, 59, 48, 0.25)"
+                      : "rgba(255,255,255,0.08)",
+                  color:
+                    sectorSeleccionado === sector.key
+                      ? "var(--primary)"
+                      : "white",
+                  cursor: "pointer",
+                  fontSize: "0.8rem",
+                  fontWeight: 600,
+                }}
+              >
+                {sector.label}
+              </button>
+            ))}
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, minmax(85px, 1fr))",
+              gap: "8px",
+            }}
+          >
+            {[
+              { label: "Estaciones", value: totalEstaciones, icon: "🚒" },
+              { label: "Disponibles", value: totalDisponibles, icon: "🟢" },
+              { label: "Ocupadas", value: totalOcupadas, icon: "🔴" },
+              { label: "Emergencias", value: totalEmergencias, icon: "🚨" },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: "10px",
+                  padding: "8px 10px",
+                  color: "white",
+                  textAlign: "center",
+                  minWidth: "85px",
+                }}
+              >
+                <div style={{ fontSize: "0.95rem", fontWeight: 700 }}>
+                  {stat.icon} {stat.value}
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.68rem",
+                    color: "rgba(255,255,255,0.7)",
+                    marginTop: "2px",
+                  }}
+                >
+                  {stat.label}
+                </div>
               </div>
             ))}
           </div>
         </div>
+        <MapContainer
+          center={[-12.046374, -77.029851]}
+          zoom={13}
+          style={{ height: "100%", width: "100%" }}
+        >
+          <TileLayer
+            attribution="&copy; OpenStreetMap contributors"
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
 
-      </div>
-
-      {/* Main Map */}
-      <div className="glass-panel" style={{ height: '100%', overflow: 'hidden' }}>
-        <MapContainer center={[-12.046374, -77.029851]} zoom={13} style={{ height: '100%', width: '100%' }}>
-          <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
-          
-          {reportes.map(rep => (
-            <Marker key={rep.id} position={[rep.latitud, rep.longitud]} icon={reportIcon}>
+          {reportes.map((rep) => (
+            <Marker
+              key={rep.id}
+              position={[rep.latitud, rep.longitud]}
+              icon={reportIcon}
+            >
               <Popup>
-                <div style={{ color: 'black' }}>
-                  <strong>{rep.tipoIncidente}</strong><br/>
+                <div style={{ color: "black" }}>
+                  <strong>{rep.tipoIncidente}</strong>
+                  <br />
                   Reporte Pendiente
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+          {estacionesFiltradas.map((estacion) => (
+            <Marker
+              key={`estacion-${estacion.id}`}
+              position={[estacion.latitud, estacion.longitud]}
+              icon={estacionIcon}
+            >
+              <Popup>
+                <div style={{ color: "black", minWidth: "240px" }}>
+                  <strong style={{ fontSize: "1rem" }}>
+                    {estacion.nombre}
+                  </strong>
+
+                  <div style={{ marginTop: "8px" }}>
+                    📍 {estacion.distrito}
+                    <br />
+                    🏠 {estacion.direccion}
+                    <br />☎ {estacion.telefono}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: "10px",
+                      padding: "8px",
+                      borderRadius: "8px",
+                      background: "#f3f3f3",
+                    }}
+                  >
+                    <strong>Resumen Operativo</strong>
+                    <br />
+                    🟢 Disponibles:{" "}
+                    {estacion.unidades?.filter((u) => u.estado === "DISPONIBLE")
+                      .length ?? 0}
+                    <br />
+                    🔴 Ocupadas:{" "}
+                    {estacion.unidades?.filter((u) => u.estado !== "DISPONIBLE")
+                      .length ?? 0}
+                    <br />
+                    🚑 Total: {estacion.unidades?.length ?? 0}
+                  </div>
                 </div>
               </Popup>
             </Marker>
